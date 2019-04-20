@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
 
 enum colors { LIGHTBLUE = 1, BLUE = 2, ORANGE = 3, YELLOW = 4, GREEN = 5, VIOLET = 6, RED = 7 };
 const int colorsRGB[7][3] = { 
@@ -17,3 +18,4 @@ const float STARTINGXPIECESPX = 295, ONEXYPX = 29.9f, STARTINGXPX = 175, STARTIN
 const int LINESFORLEVEL = 10, 
 			X = 0, Y = 1;
 
+#endif

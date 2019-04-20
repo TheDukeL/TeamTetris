@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SCREEN_H
+#define SCREEN_H
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
@@ -62,3 +63,4 @@ private:
 
 };
 
+#endif

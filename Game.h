@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GAME_H
+#define GAME_H
 
 #include "Constants.h"
 #include "Board.h"
@@ -52,3 +53,4 @@ private:
 
 };
 
+#endif

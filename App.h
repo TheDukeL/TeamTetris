@@ -1,4 +1,6 @@
-#pragma once
+#ifndef APP_H
+#define APP_H
+
 #include <SFML/Graphics.hpp>
 #include "Game.h"
 
@@ -20,3 +22,4 @@ private:
 	const int WINDOWSIZEXY[2] = { 650,650 };
 };
 
+#endif
