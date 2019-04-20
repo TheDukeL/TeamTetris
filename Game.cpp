@@ -1,11 +1,5 @@
 #include "Game.h"
-#include "L.h"
-#include "I.h"
-#include "J.h"
-#include "O.h"
-#include "S.h"
-#include "T.h"
-#include "Z.h"
+#include "Tetromino.h"
 
 Game::Game(RenderWindow &window): 
 	level(0), lines(0), started(false), points(0),closing(false), gameOver(false)
