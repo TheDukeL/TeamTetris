@@ -1,8 +1,10 @@
 #ifndef APP_H
 #define APP_H
 
+#include <gtkmm/widget.h>
 #include <SFML/Graphics.hpp>
 #include "Game.h"
+#include "SFMLWidget.h"
 
 using namespace sf;
 
@@ -10,14 +12,12 @@ class App
 {
 	
 public:
-	
-	App();
+	SFMLWidget& widget;
+	App(SFMLWidget& widget);
 	~App();
-	bool startGame();
+	void startGame();
 
-
-private:
-	RenderWindow window;		
+private:		
 	const char *GAMENAME = "Tetris";
 	const int WINDOWSIZEXY[2] = { 650,650 };
 };
