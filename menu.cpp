@@ -44,9 +44,8 @@ tetris_window::~tetris_window()
 
 
 void tetris_window::helping(){
-  Gtk::MessageDialog dialog(*this, " ",false,Gtk::MESSAGE_INFO); 
-  image.set("tetris_help.png");
-  dialog.run();
+  Gtk::MessageDialog dialog(*this, "> = move right\n< = move left\n^ = rotate\nv = move down\nSPACE = hard drop",false,Gtk::MESSAGE_QUESTION,Gtk::BUTTONS_YES_NO); 
+  int Answer=dialog.run();
 }
 
 
