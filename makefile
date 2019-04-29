@@ -4,8 +4,8 @@ SFFLAGS = -lsfml-graphics -lsfml-window -lsfml-audio -lsfml-network -lsfml-syste
 
 all:
 	$(CXX) -c *.cpp $(GTKFLAGS)
-	$(CXX) -o main1 *.o $(SFFLAGS) $(GTKFLAGS)
+	$(CXX) -o tetris *.o $(SFFLAGS) $(GTKFLAGS)
 	
 cleanup:
 	rm *.o
-	rm main1
+	rm tetris

@@ -6,7 +6,7 @@ int main(int argc, char** argv)
 {
     Gtk::Main kit(argc, argv); 								// Initialize Gtk
 	Gtk::Window window; 									// The GTK window will be our top level Window
-    SFMLWidget ourRenderWindow(sf::VideoMode(2000, 1300));	// SFMLWidget for Gtk Window
+    SFMLWidget ourRenderWindow(sf::VideoMode(1600, 1600));	// SFMLWidget for Gtk Window
     
     App app(ourRenderWindow);
 	ourRenderWindow.show();

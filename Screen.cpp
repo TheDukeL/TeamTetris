@@ -75,7 +75,7 @@ void Screen::loadFiles()
 }
 
 //draws board and tetromino
-void Screen::draw(Board& board, Tetromino& tetromino, const int x, const int y)
+void Screen::draw(Board& board, Tetromino& tetromino)
 {
 	if (window->isOpen())
 	{
@@ -83,7 +83,7 @@ void Screen::draw(Board& board, Tetromino& tetromino, const int x, const int y)
 
 		window->draw(background);
 		drawBoard(board);
-		drawTetromino(tetromino, x, y);
+		drawTetromino(tetromino, tetromino.getX(), tetromino.getY());
 		drawCurrentGameInfo();
 
 		window->display();
@@ -95,17 +95,20 @@ void Screen::drawBoard(Board & board)
 {
 	for (int i = 0; i < board.getSIZEY(); i++)
 	{
-		for (int j = 0; j <board.getSIZEX(); j++)
+		for (int j = 0; j < board.getSIZEX(); j++)
 		{
 			if (board.getSettledPieces()[i][j] != EMPTY)
 			{		
-				asignColor(board.getSettledPieces()[i][j]);
+				sqr.setTextureRect( sf::IntRect((board.getSettledPieces()[i][j]-1)*128, 0/*128*((level + 3) % 3) choose either 0, 128, or 256 based on level*/, 128, 128) );
 
-				//sets the offset for the squares
-				sqr.setPosition(Vector2f((STARTINGXPX + ((ONEXYPX)*j)),
-					(STARTINGYPX + ((ONEXYPX)*i))));
+				sqr.setPosition(STARTINGPX + (32*j), STARTINGPX + (32*i));
+
+				sqr.setScale(.25f, .25f);
 
 				window->draw(sqr);
+
+				//print the position of each individual square
+				if (DEBUGMODE) drawText("[" + to_string(j) + "," + to_string(i) + "]", DEBUGFONT, STARTINGPX + (32*j), STARTINGPX + (32*i), false, false, false);
 			}
 		}
 	}
@@ -118,47 +121,33 @@ void Screen::drawTetromino(Tetromino & tetromino, const int x, const int y)
 	{
 		for (int j = 0; j < tetromino.getSIZEXY(); j++)
 		{
-			if (tetromino.getPiece()[i][j] != EMPTY)
-			{	
-				asignColor(tetromino.getPiece()[i][j]);
+			if (tetromino.getShape()[i][j] != EMPTY || DEBUGMODE)
+			{
+				sqr.setTextureRect( sf::IntRect(128*(tetromino.getShape()[i][j]-1), 0/*128*((level + 3) % 3)*/, 128, 128) );
 
-				//sets the offset for the squares
-				sqr.setPosition(Vector2f((STARTINGXPX + ((ONEXYPX)*(j+x))),
-					(STARTINGYPX + ((ONEXYPX)*(i+y)))));
+				sqr.setPosition(STARTINGPX + (32*(j+x)), STARTINGPX + (32*(i+y)));
+
+				sqr.setScale(.25f, .25f);
+
+				//draw empty tiles as black
+				if (DEBUGMODE && tetromino.getShape()[i][j] == EMPTY) sqr.setColor(sf::Color::Black);
 
 				window->draw(sqr);
+
+				//return color to normal if set to black
+				if (DEBUGMODE) sqr.setColor(sf::Color::White);
+
+				//print the position of each individual square
+				if (DEBUGMODE) drawText("[" + to_string(j+x) + "," + to_string(i+y) + "]", DEBUGFONT, STARTINGPX + (32*(j+x)), STARTINGPX + (32*(i+y)), false, false, false);
 			}
 		}
 	}
-}
 
-//asign color to the sprint
-void Screen::asignColor(const int oneSqr)
-{
-	switch (oneSqr)	{
-	case colors::LIGHTBLUE: {sqr.setColor(Color(colorsRGB[colors::LIGHTBLUE-1][R], 
-		colorsRGB[colors::LIGHTBLUE-1][G], colorsRGB[colors::LIGHTBLUE-1][B])); break; }
-	
-	case colors::BLUE:{	sqr.setColor(Color(colorsRGB[colors::BLUE-1][R], 
-		colorsRGB[colors::BLUE-1][G], colorsRGB[colors::BLUE-1][B])); break; }
-	
-	case colors::ORANGE:{sqr.setColor(Color(colorsRGB[colors::ORANGE-1][R], 
-		colorsRGB[colors::ORANGE-1][G], colorsRGB[colors::ORANGE-1][B])); break; }
-	
-	case colors::YELLOW:{sqr.setColor(Color(colorsRGB[colors::YELLOW-1][R], 
-		colorsRGB[colors::YELLOW-1][G], colorsRGB[colors::YELLOW-1][B])); break; }
-	
-	case colors::GREEN:{sqr.setColor(Color(colorsRGB[colors::GREEN-1][R], 
-		colorsRGB[colors::GREEN-1][G], colorsRGB[colors::GREEN-1][B])); break; }
-	
-	case colors::VIOLET:{sqr.setColor(Color(colorsRGB[colors::VIOLET-1][R], 
-		colorsRGB[colors::VIOLET-1][G], colorsRGB[colors::VIOLET-1][B])); break; }
-	
-	case colors::RED: {sqr.setColor(Color(colorsRGB[colors::RED-1][R],
-		colorsRGB[colors::RED-1][G], colorsRGB[colors::RED - 1][B])); break;
-	}
-	default: {break; }
-	}
+	//print the position of the tetromino itself
+	if (DEBUGMODE) drawText("[" + to_string(tetromino.getX()) + "," + to_string(tetromino.getY()) + "]", DEBUGFONT, 32, 32, false, false, false);
+
+	//print tetromino bounds
+	if (DEBUGMODE) drawText("L:" + to_string(tetromino.getBoundsLeft()) + ",R:" + to_string(tetromino.getBoundsRight()) + "\nT:" + to_string(tetromino.getBoundsTop()) + ",B:" + std::to_string(tetromino.getBoundsBottom()), DEBUGFONT, 32, 64, false, false, false);
 }
 
 //updates the level, lines and points
@@ -170,12 +159,18 @@ void Screen::setCurrentGameInfo(const int lev, const int lin, const int poi)
 }
 
 //draws text
-void Screen::drawText(const string str, const int fontSize, const float x, const float y, const bool clear, const bool display)
+void Screen::drawText(string str, const int fontSize, const float x, const float y, const bool clear, const bool display, bool alignCenter)
 {
 	text.setString(str);
 	text.setCharacterSize(fontSize);
-	text.setPosition(x,y);
-	
+	text.setOutlineColor(GRAY);
+	text.setOutlineThickness(3);
+
+	if (alignCenter)
+		text.setPosition(x - (text.getLocalBounds().width/2), y);
+	else
+		text.setPosition(x, y);
+
 	if (window->isOpen())
 	{
 		if (clear)
@@ -192,13 +187,13 @@ void Screen::drawText(const string str, const int fontSize, const float x, const
 void Screen::start()
 {
 	float offsetY = STARTINGY - OFFSET;
-	drawText(GAMENAME, BIGFONT, STARTINGXCENTER,offsetY, true, false);
+	drawText(GAMENAME, BIGFONT, STARTINGXCENTER, offsetY, true, false);
 	
 	offsetY = offsetY + (OFFSET * 2);
-	drawText(START,MEDIUMFONT,STARTINGXCENTER,offsetY,false, false);
+	drawText(START, MEDIUMFONT, STARTINGXCENTER, offsetY, false, false);
 	
 	offsetY = offsetY + OFFSET;
-	drawText(INSTRUCTION1,SMALLFONT,STARTINGXLEFT, offsetY, false, false);
+	drawText(INSTRUCTION1, SMALLFONT, STARTINGXLEFT, offsetY, false, false);
 	
 	offsetY = offsetY + SMALLOFFSET;
 	drawText(INSTRUCTION2, SMALLFONT, STARTINGXLEFT, offsetY, false, false);
@@ -207,7 +202,7 @@ void Screen::start()
 	drawText(INSTRUCTION3, SMALLFONT, STARTINGXLEFT, offsetY, false, false);
 	
 	offsetY = offsetY + SMALLOFFSET;
-	drawText(INSTRUCTION4, SMALLFONT, STARTINGXLEFT,offsetY, false, true);
+	drawText(INSTRUCTION4, SMALLFONT, STARTINGXLEFT, offsetY, false, true);
 
 	playMusic();
 }
@@ -215,32 +210,9 @@ void Screen::start()
 //draws level, points, and lines to next level
 void Screen::drawCurrentGameInfo()
 {
-	float offset = STARTINGY;
-	drawText(LEVEL, MEDIUMFONT, STARTINGXRIGHT, offset, false, false);
-	
-	offset = offset + OFFSET;
-	drawText(to_string(level), MEDIUMFONT, STARTINGXRIGHT+OFFSET, offset, false, false);
-	
-	offset = offset + OFFSET;
-	drawText(POINTS, MEDIUMFONT, STARTINGXRIGHT, offset, false, false);
-	
-	offset = offset + OFFSET;
-	drawText(to_string(points), MEDIUMFONT, STARTINGXRIGHT, offset, false, false);
-	
-	offset = STARTINGYLOW;
-	drawText(NEXTLEVEL1, SMALLFONT, STARTINGXRIGHT, offset, false, false);
-	
-	offset = offset + SMALLOFFSET ;
-	drawText(NEXTLEVEL2, SMALLFONT, STARTINGXRIGHT, offset, false, false);
-
-	offset = offset + SMALLOFFSET ;
-	drawText(to_string(LINESFORLEVEL - lines), MEDIUMFONT, STARTINGXRIGHT+OFFSET, offset, false, false);
-
-	offset = STARTINGYLOW;
-	drawText(PAUSE, SMALLFONT, SMALLOFFSET/3, offset, false, false);
-
-	offset = offset+SMALLOFFSET;
-	drawText(RESUME, SMALLFONT, SMALLOFFSET/3, offset, false, false);
+	drawText(to_string(points), MEDIUMFONT, 384+133, 512-145-11, false, false);
+	drawText(to_string(level), MEDIUMFONT, 384+133, 670-168-11, false, false);
+	drawText(to_string(LINESFORLEVEL - lines), MEDIUMFONT, 384+133, 830-195-12, false, false);
 }
 
 //shows winner screen
@@ -250,19 +222,17 @@ void Screen::win()
 	drawText(WIN2, MEDIUMFONT, STARTINGXCENTER, STARTINGY+OFFSET, false, true);
 }
 
-
 //closes the game
 void Screen::close()
 {
 	window->close();
 }
 
-
 //shows game over sceen
 void Screen::gameOver()
 {
 	float offset = STARTINGY;
-	drawText( GAMEOVER1, MEDIUMFONT,STARTINGXBOARD , offset, false, false);
+	drawText( GAMEOVER1, MEDIUMFONT, STARTINGXBOARD, offset, false, false);
 	offset = offset + OFFSET;
 	drawText(GAMEOVER2, SMALLFONT, STARTINGXBOARD-OFFSET, offset, false, false);
 	offset = offset + OFFSET;

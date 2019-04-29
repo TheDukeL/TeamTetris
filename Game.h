@@ -5,7 +5,8 @@
 #include "Board.h"
 #include "Tetromino.h"
 #include "Screen.h"
-#include <stdlib.h>    
+#include <stdlib.h>   
+#include <vector>
 #include <ctime> 
 #include <SFML/System.hpp>
 
@@ -26,21 +27,19 @@ public:
 	
 private:
 	Board oneBoard;
-	Tetromino *tetrominos[7][4], *fallingTetromino;
+	Tetromino *fallingTetromino;
+	vector<Tetromino*> nextTetrominos;
 	Clock clock;
 	Time time;
 	Screen oneScreen;
 
-	const int NUMTETROMINOS = 7,NUMMAXROT = 4,ONELEVELSPEED= 50,INITALSPEED= 600, ONEPOINT = 10,FINALLEVEL = 10,
-		INITIALROTATION=1;
-	enum origin { APP, TICK };
-
-	int xy[2],level,lines,points,fallingTetrominoType;
+	int level, lines, points, fallingTetrominoType, stallPlace = 4;
 	bool started, closing, gameOver;
 
-	void generateTetrominos();
-	void generateFallingTetromino();
+	void determineNextTetrominos();
+	Tetromino* generateTetromino();
 	void doAfterEvent();
+	void finalizeTetromino();
 	void checkGameOver();
 	void moveLeft();
 	void moveDown(int origin);
@@ -49,8 +48,6 @@ private:
 	void checkBoard();
 	void checkLines();
 	void restart();
-
-
 };
 
 #endif

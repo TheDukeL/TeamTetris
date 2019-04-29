@@ -4,82 +4,81 @@
 #include <array>
 #include <iostream>
 
-using namespace std;
-
 class Tetromino
 {
 public:
     Tetromino();
     virtual ~Tetromino();
-    virtual void rotate(const int rot)=0;
-
-    int getRot();
-    int getRotNum();
-    array<array<int, 4>, 4> getPiece();
-    const int getSIZEXY();
+    
+    void rotate();
+    void shiftLeft();
+    void shiftRight();
+    void shiftDown();
+    int getBoundsTop();
+    int getBoundsBottom();
+    int getBoundsLeft();
+    int getBoundsRight();
+    int getSIZEXY();
+    int getX();
+    int getY();
+    void setX(int x);
+    void setY(int y);
+    void setPos(int x, int y);
+    std::array<std::array<int, 4>, 4> getShape();
 
 protected:
-    void clear();
-    int rot,    // Rotation state of the tetormino
-        rotnum; // Max number of rotations of the tetromino
-    array<array<int, 4>, 4> piece = {};
-    const int SIZEXY = 4;
+    const int SIZEXY = 4; //represents the side length of the actual tetris piece array
+    std::array<std::array<int, 4>, 4> shape = {};
+    int position[2];
 };
 
-class I: public Tetromino
+class IBlock: public Tetromino
 {
 public:
-    void rotate(const int rotation);
-    I();
-    ~I();
+    IBlock();
+    ~IBlock();
 };
 
-class J: public Tetromino
+class JBlock: public Tetromino
 {
 public:
-    void rotate(const int rot);
-    J();
-    ~J();
+    JBlock();
+    ~JBlock();
 };
 
-class L :public Tetromino
+class LBlock :public Tetromino
 {
 public:
-    void rotate(const int rot);
-    L();
-    ~L();
+    LBlock();
+    ~LBlock();
 };
 
-class O :public Tetromino
+class OBlock :public Tetromino
 {
 public:
-    void rotate(const int rot);
-    O();
-    ~O();
+    OBlock();
+    ~OBlock();
 };
 
-class S :public Tetromino
+class SBlock :public Tetromino
 {
 public:
-    void rotate(const int rot);
-    S();
-    ~S();
+    SBlock();
+    ~SBlock();
 };
 
-class T :public Tetromino
+class ZBlock :public Tetromino
 {
 public:
-    void rotate(const int rot);
-    T();
-    ~T();
+    ZBlock();
+    ~ZBlock();
 };
 
-class Z :public Tetromino
+class TBlock :public Tetromino
 {
 public:
-    void rotate(const int rot);
-    Z();
-    ~Z();
+    TBlock();
+    ~TBlock();
 };
 
 #endif

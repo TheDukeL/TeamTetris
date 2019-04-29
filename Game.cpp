@@ -2,211 +2,199 @@
 #include "Tetromino.h"
 
 Game::Game(RenderWindow &window): 
-	level(0), lines(0), started(false), points(0),closing(false), gameOver(false)
+	level(0), lines(0), started(false), points(0), closing(false), gameOver(false)
 {
 	oneScreen.setInitialConfig(window);
 	time = milliseconds(INITALSPEED);
-	generateTetrominos();
-	generateFallingTetromino();
+	fallingTetromino = generateTetromino();
 }
 
 Game::~Game()
 {
-	for (int i = 0; i < NUMTETROMINOS; i++)
-	{
-		int rot = 1;
-		for (int j = 0; j < rot; j++)
-		{
-			if (j == 0) { rot = tetrominos[i][j]->getRotNum(); }
+	for (int i = 0; i < nextTetrominos.size(); i++)
+		delete(nextTetrominos[i]);
+	nextTetrominos.clear();
 
-			delete tetrominos[i][j];
-
-		}
-	}
+	delete fallingTetromino;
 }
 
 //manages events
 void Game::update(const Event event)
 {
-	
-	if (event.type == Event::Closed) { oneScreen.closing(); closing = true; started = false; }
+	if (event.type == Event::Closed)
+	{
+		oneScreen.closing();
+		closing = true;
+		started = false;
+	}
 
-		
 	if (closing)
 	{
 		if (event.type == Event::KeyPressed)
 		{	
-			
 			switch (event.key.code)
 			{
-			case Keyboard::S: { restart(); closing = false; break; }
-			case Keyboard::Return: { oneScreen.close(); break; }
-			default: {break; }
+				case Keyboard::S: { restart(); closing = false; break; }
+				case Keyboard::Return: { oneScreen.close(); break; }
+				default: {break; }
 			}
 		}
 	}
 	else
 	{
-				if(started)
+		if (started)
+		{
+			if (event.type == Event::KeyPressed)
+			{
+				switch (event.key.code)
 				{
-	
-	
-					if (event.type == Event::KeyPressed)
-					{
-						switch (event.key.code)
-						{
-						case Keyboard::Up: { rotate(); break; }
-						case Keyboard::Left: { moveLeft(); break; }
-						case Keyboard::Right: { moveRight(); break; }
-						case Keyboard::Down: { moveDown(origin::APP); break; }
-						case Keyboard::Space: { moveDown(origin::APP); break; }
-						case Keyboard::P: { started = false; oneScreen.pauseMusic(); break; }
-						default: {break; }
-						}
-						
-					
-					}
-
-					doAfterEvent();
-					}
-					else
-
-					{
-
-						if (gameOver)
-						{
-							if (event.type == Event::KeyPressed)
-							{
-								switch (event.key.code)
-								{
-								case Keyboard::Return: { restart(); break; }
-								case Keyboard::Escape: { oneScreen.close(); break; }
-								default: {break; }
-								}
-							}
-						}
-						else
-						{
-							if (event.type == Event::KeyPressed)
-							{
-								switch (event.key.code)
-								{
-								case Keyboard::Return: { started = true; break; }
-								case Keyboard::P: { started = true; oneScreen.playMusic(); break; }
-								default: {break; }
-								}
-							}
-						}
-					
+					case Keyboard::Up: { rotate(); break; }
+					case Keyboard::Left: { moveLeft(); break; }
+					case Keyboard::Right: { moveRight(); break; }
+					case Keyboard::Down: { moveDown(origin::APP); break; }
+					case Keyboard::P: { started = false; oneScreen.pauseMusic(); break; }
+					default: { break; }
 				}
+			}
+			doAfterEvent();
 		}
-	
+		else
+		{
+			if (gameOver)
+			{
+				if (event.type == Event::KeyPressed)
+				{
+					switch (event.key.code)
+					{
+						case Keyboard::Return: { restart(); break; }
+						case Keyboard::Escape: { oneScreen.close(); break; }
+						default: {break; }
+					}
+				}
+			}
+			else
+			{
+				if (event.type == Event::KeyPressed)
+				{
+					switch (event.key.code)
+					{
+						case Keyboard::Return: { started = true; break; }
+						case Keyboard::P: { started = true; oneScreen.playMusic(); break; }
+						default: { break; }
+					}
+				}
+			}			
+		}
+	}
 }
 
 //shows start screen
 void Game::start()
 {
 	oneScreen.start();
-
 }
 
-/*things to do after every event: drawing, checking collisions, addinng tetrominos to the board 
+/* things to do after every event: drawing, checking collisions, adding tetrominos to the board 
 checking game over, generating new tetromino and checking for new lines */
 void Game::doAfterEvent()
 {
-	
-	if (oneBoard.checkCollision(*fallingTetromino, xy[X], xy[Y]))
+	if (DEBUGMODE)
 	{
-		oneBoard.addPieceToBoard(*fallingTetromino, xy[X], xy[Y]);
-		
-		generateFallingTetromino();
+		std::cout << std::boolalpha;
+		std::cout << "\n\n\n\nleft: " << oneBoard.movementAllowed(*fallingTetromino, -1, 0) << std::endl;
+		std::cout << "right: " << oneBoard.movementAllowed(*fallingTetromino, 1, 0) << std::endl;
+		std::cout << "down: " << oneBoard.movementAllowed(*fallingTetromino, 0, 1) << std::endl;
 	}
 
-	oneScreen.draw(oneBoard, *fallingTetromino, xy[X], xy[Y]);
+	/*
+	//Tetromino has landed. Add it to board at [x, y] and generate new tetromino.
+	if (!oneBoard.movementAllowed(*fallingTetromino, 0, 1))//(oneBoard.checkCollision(*fallingTetromino, fallingTetromino->getX(), fallingTetromino->getY()))
+	{
+		if (DEBUGMODE) stallPlace--;
+		oneBoard.settleTetromino(*fallingTetromino);
+		fallingTetromino = generateTetromino();
+	}
+	*/
+
+	oneScreen.draw(oneBoard, *fallingTetromino);
 	checkBoard();
 	checkGameOver();
-	
-	
 }
 
-//moves left a piece
+// "Lands" the Tetromino. Adds it to board at current tetromino position and generates a new one/
+void Game::finalizeTetromino()
+{
+	oneBoard.settleTetromino(*fallingTetromino);
+	fallingTetromino = generateTetromino();
+}
+
+//moves current piece left by one
 void Game::moveLeft()
 {
-	if (oneBoard.movementAllowed(*fallingTetromino, (xy[X]-1), xy[Y]))
-	{
-		xy[X]--;
-	}
+	if ( oneBoard.movementAllowed(*fallingTetromino, -1, 0) )
+		fallingTetromino->shiftLeft();
 }
 
-//moves down a piece
-void Game::moveDown(int origin)
-{
-	if (oneBoard.movementAllowed(*fallingTetromino, (xy[X]), xy[Y] + 1))
-	{
-		xy[Y]++;
-	}
-	
-	if (origin == origin::TICK)
-	{
-		doAfterEvent();
-	}
-}
-
-//moves right a piece
+//moves current piece right by one
 void Game::moveRight()
 {
-	if (oneBoard.movementAllowed(*fallingTetromino, (xy[X]+1), xy[Y]))
-	{
-		xy[X]++;
-	}
+	if ( oneBoard.movementAllowed(*fallingTetromino, 1, 0) )
+		fallingTetromino->shiftRight();
+}
+
+//moves current piece down by one
+void Game::moveDown(int origin)
+{
+	if (oneBoard.movementAllowed(*fallingTetromino, 0, 1))
+		fallingTetromino->shiftDown();
+	else
+		finalizeTetromino();
+	
+	if (origin == origin::TICK)
+		doAfterEvent();
 }
 
 //rotates a piece
 void Game::rotate()
 {
-	int rot = INITIALROTATION;
-	if ((fallingTetromino->getRot() + 1) <= fallingTetromino->getRotNum())
+	fallingTetromino->rotate();
+
+	// this is super ultra hacky
+	if (oneBoard.checkCollision(*fallingTetromino, fallingTetromino->getX(), fallingTetromino->getY()))//if (!oneBoard.movementAllowed(*fallingTetromino, 0, 0))
 	{
-		rot = (fallingTetromino->getRot() + 1);
-	
+		//rotated tetromino experienced a collision - rotate it 3 more times to move it back to the original position
+		fallingTetromino->rotate();
+		fallingTetromino->rotate();
+		fallingTetromino->rotate();
 	}
-
-	Tetromino* rotatedTetromino = tetrominos[fallingTetrominoType][rot-1];
-
-		
-	if (oneBoard.movementAllowed(*rotatedTetromino, xy[X], xy[Y]))
-	{			
-		
-				fallingTetromino= tetrominos[fallingTetrominoType][rot-1];
-	}
-	
 }
 
 //checks for lines to clean, cleans them, checks lines to next level and accumulates points
 void Game::checkBoard()
 {	
-			
-		int linesToAdd = oneBoard.checkAndCleanLines();
-		lines = lines+ linesToAdd;
-		points = points+(linesToAdd*ONEPOINT);
-		checkLines();
-
+	int linesToAdd = oneBoard.checkAndCleanLines();
+	lines = lines + linesToAdd;
+	points = points + (linesToAdd*ONEPOINT);
+	checkLines();
 }
 
 //controlls the levels and pass to screen data of the current game
 void Game::checkLines()
 {
 	if (lines >= LINESFORLEVEL)
-	{	lines = 0;
+	{	
+		lines = 0;
 		level++;
 		time = time - milliseconds(ONELEVELSPEED);
 	}
 
-	if (level>FINALLEVEL)
+	/*
+	if (level > FINALLEVEL)
 	{
 		started = false;
 		oneScreen.win();
 	}
+	*/
 
 	oneScreen.setCurrentGameInfo(level, lines, points);
 }
@@ -215,19 +203,15 @@ void Game::checkLines()
 void Game::restart()
 {	
 	oneBoard.cleanBoard();
-	xy[X] = oneBoard.getSTARTINGX();
-	xy[Y] = oneBoard.getSTARTINGY();
 	started = true;
 	gameOver = false;
 	level = 0;
 	lines = 0;
 	points = 0;
-	oneScreen.setCurrentGameInfo(level,lines,points);
-	oneScreen.draw(oneBoard, *fallingTetromino, xy[X], xy[Y]);
+	oneScreen.setCurrentGameInfo(level, lines, points);
+	oneScreen.draw(oneBoard, *fallingTetromino);
 	oneScreen.playMusic();
 }
-
-
 
 //checks for game over
 void Game::checkGameOver()
@@ -237,62 +221,43 @@ void Game::checkGameOver()
 		started = false;
 		gameOver = true;
 		oneScreen.gameOver();
-		
 	}
 }
-
 
 //controlls time
 void Game::tick()
 {
 		if(started)
 		{
-
 			if (clock.getElapsedTime() >= time)
 			{
 				clock.restart();
-				moveDown(origin::TICK);
+				if (!DEBUGMODE) moveDown(origin::TICK);
 			}
 		}
 }
 
-//generate the pieces with all their rotations at the start of the game
-void Game::generateTetrominos() 
+void Game::determineNextTetrominos()
 {
-	
-	for (int i = 0; i < NUMTETROMINOS; i++)
-	{ int rot = 1;
-		for (int j = 0; j < rot; j++)
-		{		
-			switch (i)
-			{
-			case 0: { tetrominos[i][j] = new I; break; }
-			case 1: { tetrominos[i][j] = new J; break; }
-			case 2: { tetrominos[i][j] = new L; break; }
-			case 3: { tetrominos[i][j] = new O; break; }
-			case 4: { tetrominos[i][j] = new S; break; }
-			case 5: { tetrominos[i][j] = new T; break; }
-			case 6: { tetrominos[i][j] = new Z; break; }
-			default:
-				break;
-			}
-			
-			if (j == 0){rot = tetrominos[i][j]->getRotNum();}
-			else{tetrominos[i][j]->rotate(j + 1);}
-		}
-	}
-	
+	nextTetrominos.push_back(new IBlock);
+	nextTetrominos.push_back(new JBlock);
+	nextTetrominos.push_back(new LBlock);
+	nextTetrominos.push_back(new OBlock);
+	nextTetrominos.push_back(new SBlock);
+	nextTetrominos.push_back(new TBlock);
+	nextTetrominos.push_back(new ZBlock);
+
+	std::random_shuffle(nextTetrominos.begin(), nextTetrominos.end());
 }
 
-//generates a new random tetromino
-void Game::generateFallingTetromino()
+Tetromino* Game::generateTetromino()
 {
-		
-	srand(std::time(NULL));
-	int num = rand() % NUMTETROMINOS;
-		
-	fallingTetromino = tetrominos[num][INITIALROTATION-1];
-	fallingTetrominoType = num;
-	xy[X] = oneBoard.getSTARTINGX();
-	xy[Y] = oneBoard.getSTARTINGY();
+	//fill up nextTetrominos if it's empty
+	if (!nextTetrominos.size())
+		determineNextTetrominos();
+
+	Tetromino* newTetromino = nextTetrominos.back();
+	nextTetrominos.pop_back();
+
+	return newTetromino;
 }

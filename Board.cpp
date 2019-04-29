@@ -1,4 +1,5 @@
 #include "Board.h"
+#include <iostream>
 #include <list>
 
 using namespace std;
@@ -7,43 +8,98 @@ Board::Board() {};
 Board::~Board() {};
 
 // Adds a tetris piece to the board of type tetromino at [x, y]
-void Board::addPieceToBoard(Tetromino& tetromino, int x, int y)
+void Board::settleTetromino(Tetromino& tetromino)
 {		
 	for (int i = 0; i < tetromino.getSIZEXY(); i++)
 		for (int j = 0; j < tetromino.getSIZEXY(); j++)
-			if (tetromino.getPiece()[i][j] != EMPTY)
-				settledPieces[i+y][j+x] = tetromino.getPiece()[i][j];
+			if (tetromino.getShape()[i][j] != EMPTY)
+				settledPieces[i+tetromino.getY()][j+tetromino.getX()] = tetromino.getShape()[i][j];
 }
 
-//checks for collisions
+//checks if the tetromino is colliding with settled tetrominos on the board at x, y
 bool Board::checkCollision(Tetromino & tetromino, int x, int y)
 {
+	int tetX = tetromino.getX();
+	int tetY = tetromino.getY();
+	int size = tetromino.getSIZEXY();
+
 	for (int i = 0; i < tetromino.getSIZEXY(); i++)
 	{
 		for (int j = 0; j < tetromino.getSIZEXY(); j++)
 		{
-			if ((y+i) > (SIZEXY[Y]-2) && tetromino.getPiece()[i][j] != EMPTY)
+			if (tetY+j > SIZEXY[Y]-1)
 				return true;
 
-			if (i == tetromino.getSIZEXY()-1)
+			if (tetromino.getShape()[i][j] != EMPTY)
 			{
-				if (tetromino.getPiece()[i][j] != EMPTY && settledPieces[i + y + 1][j + x] != EMPTY)
-					return true;
-			}
-			else
-			{ 
-				if (tetromino.getPiece()[i][j] != EMPTY && tetromino.getPiece()[i+1][j] == EMPTY && settledPieces[i + y + 1][j + x] != EMPTY)
+				if (settledPieces[tetX + i + 1][tetY + j + 1] != EMPTY)
 					return true;
 			}
 		}
 	}
 
+	/*
+	for (int i = 0; i < tetromino.getSIZEXY(); i++)
+	{
+		for (int j = 0; j < tetromino.getSIZEXY(); j++)
+		{
+			if ((tetromino.getY()+i) > (SIZEXY[Y]-2) && tetromino.getShape()[i][j] != EMPTY)
+				return true;
+
+			if (i == tetromino.getSIZEXY()-1)
+			{
+				if (tetromino.getShape()[i][j] != EMPTY && settledPieces[i + tetromino.getY() + 1][j + tetromino.getX()] != EMPTY)
+					return true;
+			}
+			else
+			{ 
+				if (tetromino.getShape()[i][j] != EMPTY && tetromino.getShape()[i+1][j] == EMPTY && settledPieces[i + tetromino.getY() + 1][j + tetromino.getX()] != EMPTY)
+					return true;
+			}
+		}
+	}
+	*/
+
 	return false;
 }
 
-//check if the movement is allowed
-bool Board::movementAllowed(Tetromino & tetromino, int x, int y)
+//check if the movement is allowed to xOff, yOff
+bool Board::movementAllowed(Tetromino & tetromino, int xOff, int yOff)
 {
+	int x = tetromino.getX();
+	int y = tetromino.getY();
+	int size = tetromino.getSIZEXY();
+
+	int xMin = x+tetromino.getBoundsLeft()+xOff; //left bound
+	int xMax = x+size-tetromino.getBoundsRight()+xOff; //right bound
+	int yMin = y+tetromino.getBoundsTop()+yOff; //top bound
+	int yMax = y+size-tetromino.getBoundsBottom()+yOff; //bottom bound
+
+	//prevent the tetromino from going off the game board
+	if (xMin < 0 || xMax > SIZEXY[X] || yMax > SIZEXY[Y])
+		return false;
+
+	//make sure the new space isn't occupied by any settled tetrominoes
+	if (checkCollision(tetromino, x+xOff, y+yOff))
+	{
+		return false;
+	}
+
+	//check and see if any of the tetromino's squares overlap with any squares on the board
+	for (int i = 0; i < size; i++)
+	{
+		for (int j = 0; j < size; j++)
+		{
+			if (tetromino.getShape()[i][j] != EMPTY && settledPieces[i+y+yOff][j+x+xOff] != EMPTY)
+			{
+				return false;
+			}
+		}
+	}
+
+	return true;
+
+/*
 	if (x < 0 || x > (SIZEXY[X]-1) || y > (SIZEXY[Y]-1))
 		return false;
 
@@ -51,19 +107,20 @@ bool Board::movementAllowed(Tetromino & tetromino, int x, int y)
 	{
 		for (int j = 0; j < tetromino.getSIZEXY(); j++)
 		{
-			if ((j+x) > (SIZEXY[X] - 1) && tetromino.getPiece()[i][j] != EMPTY)	
+			if ((j+x) > (SIZEXY[X] - 1) && tetromino.getShape()[i][j] != EMPTY)	
 				return false;
-			if ((i+y) > (SIZEXY[Y] - 1) && tetromino.getPiece()[i][j] != EMPTY)
+			if ((i+y) > (SIZEXY[Y] - 1) && tetromino.getShape()[i][j] != EMPTY)
 				return false;
-			if (tetromino.getPiece()[i][j] != EMPTY && settledPieces[i + y][j + x] != EMPTY)
+			if (tetromino.getShape()[i][j] != EMPTY && settledPieces[i + y][j + x] != EMPTY)
 				return false;
 		}
 	}
 
 	return true;
+	*/
 }
 
-//checks lines, cleans them and returns the amount of lines cleaned
+//checks lines, cleans them and returns the amount of lines cleaned (for incrementing score)
 int Board::checkAndCleanLines()
 {
 	list<int> linesToClean;
@@ -74,16 +131,18 @@ int Board::checkAndCleanLines()
 		found = true;
 
 		for (int j = 0; j < SIZEXY[X]; j++)
-			if (settledPieces[i][j] == EMPTY) { found = false; }
+			if (settledPieces[i][j] == EMPTY)
+				found = false;
 
-		if (found) { linesToClean.push_back(i); }
+		if (found) //we found a filled line
+			linesToClean.push_back(i);
 	}
 
-	if (linesToClean.empty()) { return EMPTY; }
+	if (linesToClean.empty())
+		return EMPTY;
 
-	for (int line : linesToClean) {
+	for (int line : linesToClean)
 		cleanLine(line);
-	}
 
 	return linesToClean.size();
 }
@@ -122,7 +181,7 @@ void Board::cleanBoard()
 			settledPieces[i][j] = EMPTY;
 }
 
-array<array<int, 13>, 23> Board::getSettledPieces()
+std::array<std::array<int, 13>, 23> Board::getSettledPieces()
 {
 	return settledPieces;
 }
@@ -135,14 +194,4 @@ const int Board::getSIZEX()
 const int Board::getSIZEY()
 {
 	return SIZEXY[Y];
-}
-
-const int Board::getSTARTINGX()
-{
-	return STARTINGX;
-}
-
-const int Board::getSTARTINGY()
-{
-	return STARTINGY;
 }
