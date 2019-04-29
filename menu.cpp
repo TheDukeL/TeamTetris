@@ -43,9 +43,26 @@ tetris_window::tetris_window()
 tetris_window::~tetris_window()
 {}
 ////
+
+
 void tetris_window::helping(){
-  
+  //help image pop up
 }
+
+
+
 void tetris_window::settingspop(){
-  
+  Gtk::MessageDialog dialog(*this, "Music?",false,Gtk::MESSAGE_QUESTION,Gtk::BUTTONS_YES_NO); 
+  int Answer=dialog.run(); 
+  switch(Answer){
+  case(Gtk::RESPONSE_YES):
+      //music on
+    break;
+  case(Gtk::RESPONSE_NO):
+    //music off
+    break;
+  default:
+    //music on by default
+      break;
+  }
 }
