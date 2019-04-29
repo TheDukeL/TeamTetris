@@ -44,7 +44,9 @@ tetris_window::~tetris_window()
 
 
 void tetris_window::helping(){
+  Gtk::MessageDialog dialog(*this, " ",false,Gtk::MESSAGE_INFO); 
   image.set("tetris_help.png");
+  dialog.run();
 }
 
 
