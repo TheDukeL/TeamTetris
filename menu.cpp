@@ -46,7 +46,7 @@ tetris_window::~tetris_window()
 
 
 void tetris_window::helping(){
-  //help image pop up
+  image.set("tetris_help.png");
 }
 
 
