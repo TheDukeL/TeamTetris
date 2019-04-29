@@ -1,338 +1,252 @@
 #include "Tetromino.h"
 #include "Constants.h"
 
-Tetromino::Tetromino() {};
+Tetromino::Tetromino()
+{
+    this->setX(STARTINGX);
+    this->setY(STARTINGY);
+}
 
 Tetromino::~Tetromino() {};
 
-void Tetromino::clear()
+//rotates this shape 90 degrees counter-clockwise
+void Tetromino::rotate()
 {
-    for (int i = 0; i < SIZEXY; i++)
+    //I pulled this from https://www.geeksforgeeks.org/inplace-rotate-square-matrix-by-90-degrees/
+    //no idea how it works
+    for (int i = 0; i < SIZEXY/2; i++)
+    { 
+        for (int j = i; j < SIZEXY-i-1; j++)
+        { 
+            int temp = shape[i][j];
+
+            shape[i][j] = shape[SIZEXY-1-j][i];
+            shape[SIZEXY-1-j][i] = shape[SIZEXY-1-i][SIZEXY-1-j];
+            shape[SIZEXY-1-i][SIZEXY-1-j] = shape[j][SIZEXY-1-i];
+            shape[j][SIZEXY-1-i] = temp;
+        } 
+    } 
+}
+
+//moves this shape one square to the left
+void Tetromino::shiftLeft()
+{
+    this->position[0]--;
+}
+
+//moves this shape one square to the right
+void Tetromino::shiftRight()
+{
+    this->position[0]++;
+}
+
+//moves this shape one square down
+void Tetromino::shiftDown()
+{
+    this->position[1]++;
+}
+
+/*
+The getBounds functions find the positions where the actual tetris piece begins in its array.
+
+I.E. the following shape:
+
+0 0 0 0
+0 1 0 0
+0 1 0 0
+0 1 0 0
+
+would have a 1 for boundsTop, 1 for boundsLeft, 2 for boundsRight, and 0 for boundsBottom.
+*/
+
+int Tetromino::getBoundsTop()
+{
+    for (int i = 0; i < SIZEXY; i++) //scan from the top row down
     {
-        for (int j = 0; j < SIZEXY; j++)
+        for (int j = 0; j < SIZEXY; j++) //scan from left-to-right on each row
         {
-            piece[i][j] = EMPTY;
+            //we hit the top of the tetris piece- return the row
+            if (shape[i][j] > 0)
+                return i;
         }
     }
+    return SIZEXY-1;
 }
 
-int Tetromino::getRot()
+int Tetromino::getBoundsBottom()
 {
-    return rot;
+    for (int i = SIZEXY-1; i > 0; i--) //scan from the bottom row up
+    {
+        for (int j = 0; j < SIZEXY; j++) //scan from left-to-right on each row
+        {
+            //we hit the bottom of the tetris piece- return the row
+            if (shape[i][j] > 0)
+                return SIZEXY-1-i; //subtract i from SIZEXY-1 to get it from bottom instead of top
+        }
+    }
+
+    return 0;
 }
 
-int Tetromino::getRotNum()
+int Tetromino::getBoundsLeft()
 {
-    return rotnum;
+    for (int i = 0; i < SIZEXY; i++) //scan from left column to right
+    {
+        for (int j = 0; j < SIZEXY; j++) //scan from top-to-bottom on each column
+        {
+            //we hit the left of the tetris piece; return the column
+            if (shape[j][i] > 0)
+                return i;
+        }
+    }
+
+    return SIZEXY-1;
 }
 
-array<array<int, 4>, 4> Tetromino::getPiece()
+int Tetromino::getBoundsRight()
 {
-    return piece;
+    for (int i = SIZEXY-1; i > 0; i--) //scan from right column to left
+    {
+        for (int j = 0; j < SIZEXY; j++) //scan from top-to-bottom on each column
+        {
+            //we hit the right of the tetris piece; return the column
+            if (shape[j][i] > 0)
+                return SIZEXY-1-i; //subtract i from SIZEXY-1 to get it from right instead of left
+        }
+    }
+
+    return 0;
 }
 
-const int Tetromino::getSIZEXY()
+//SIZEXY represents the side length of the actual tetris piece array (always 4 in our case)
+int Tetromino::getSIZEXY()
 {
     return SIZEXY;
 }
 
-void I::rotate(int rotation)
+int Tetromino::getX()
 {
-    switch (rotation)
-    {
-    case 1:
-        for (int i = 0; i < SIZEXY; i++)
-        {
-            for (int j = 0; j < SIZEXY; j++)
-            {
-                if (j == 0)
-                    piece[i][j] = colors::LIGHTBLUE;
-                else
-                    piece[i][j] = 0;
-            }
-        }
-        rot = 1;
-        break;
-    case 2:
-        for (int i = 0; i < SIZEXY; i++)
-        {
-            for (int j = 0; j < SIZEXY; j++)
-            {
-                if (i == 0)
-                    piece[i][j] = colors::LIGHTBLUE;
-                else
-                    piece[i][j] = 0;
-            }
-        }
-        rot = 2;
-        break;
-    default:
-        break;
-    }
+    return this->position[X];
 }
 
-I::I()
+int Tetromino::getY()
 {
-    rotate(1);
-    rotnum = 2;
+    return this->position[Y];
 }
 
-I::~I() {};
-
-void J::rotate(int rotation)
+void Tetromino::setX(int x)
 {
-    switch (rotation)
-    {
-    case 1:
-        clear();
-        piece[2][0] = colors::BLUE;
-
-        for (int i = 0; i <SIZEXY - 1; i++)
-        {
-            piece[i][1] = colors::BLUE;
-        }
-        rot = 1;
-        break;
-    case 2:
-        clear();
-        piece[0][0] = colors::BLUE;
-
-        for (int i = 0; i <SIZEXY - 1; i++)
-        {
-            piece[1][i] = colors::BLUE;
-        }
-        rot = 2;
-        break;
-    case 3:
-        clear();
-        piece[0][1] = colors::BLUE;
-
-        for (int i = 0; i <SIZEXY - 1; i++)
-        {
-            piece[i][0] = colors::BLUE;
-        }
-        rot = 3;
-        break;
-    case 4:
-        clear();
-        piece[1][2] = colors::BLUE;
-
-        for (int i = 0; i <SIZEXY - 1; i++)
-        {
-            piece[0][i] = colors::BLUE;
-        }
-        rot = 4;
-        break;
-    default:
-        break;
-    }
+    this->position[X] = x;
 }
 
-J::J()
+void Tetromino::setY(int y)
 {
-    rotate(1);
-    rotnum = 4;
+    this->position[Y] = y;
 }
 
-J::~J() {};
-
-void L::rotate(int rotation)
+void Tetromino::setPos(int x, int y)
 {
-    switch (rotation)
-    {
-    case 1:
-        clear();
-        piece[2][1] = colors::ORANGE;
-
-        for (int i = 0; i <SIZEXY - 1; i++)
-        {
-            piece[i][0] = colors::ORANGE;
-        }
-        rot = 1;
-        break;
-    case 2:
-        clear();
-        piece[1][0] = colors::ORANGE;
-
-        for (int i = 0; i <SIZEXY - 1; i++)
-        {
-            piece[0][i] = colors::ORANGE;
-        }
-        rot = 2;
-        break;
-    case 3:
-        clear();
-        piece[0][0] = colors::ORANGE;
-
-        for (int i = 0; i <SIZEXY - 1; i++)
-        {
-            piece[i][1] = colors::ORANGE;
-        }
-        rot = 3;
-        break;
-    case 4:
-        clear();
-        piece[0][2] = colors::ORANGE;
-
-        for (int i = 0; i <SIZEXY - 1; i++)
-        {
-            piece[1][i] = colors::ORANGE;
-        }
-        rot = 4;
-        break;
-    default:
-        break;
-    }
+    this->position[X] = x;
+    this->position[Y] = y;
 }
 
-L::L()
+//returns a 2D std::array of this tetris piece's shape
+std::array<std::array<int, 4>, 4> Tetromino::getShape()
 {
-    rotate(1);
-    rotnum = 4;
+    return shape;
 }
 
-L::~L() {};
+/*
+0 - empty
+1 - red
+2 - orange
+3 - yellow
+4 - green
+5 - light blue
+6 - blue
+7 - purple
+*/
 
-void O::rotate(int rotation)
+IBlock::IBlock()
 {
-    if (rotation == 1)
-    {
-        clear();
-        piece[0][0] = colors::YELLOW;
-        piece[1][0] = colors::YELLOW;
-        piece[0][1] = colors::YELLOW;
-        piece[1][1] = colors::YELLOW;
-    }
+    this->shape = {{
+        {0, 0, 5, 0},
+        {0, 0, 5, 0},
+        {0, 0, 5, 0},
+        {0, 0, 5, 0}
+    }};
 }
 
-O::O()
+IBlock::~IBlock() {};
+
+JBlock::JBlock()
 {
-    rotate(1);
-    rotnum = 1;
+    this->shape = {{
+        {0, 0, 6, 0},
+        {0, 0, 6, 0},
+        {0, 6, 6, 0},
+        {0, 0, 0, 0}
+    }};
 }
 
-O::~O() {};
+JBlock::~JBlock() {};
 
-void S::rotate(int rotation)
+LBlock::LBlock()
 {
-    switch (rotation)
-    {
-    case 1:
-        clear();
-        piece[1][0] = colors::GREEN;
-        piece[0][1] = colors::GREEN;
-        piece[1][1] = colors::GREEN;
-        piece[0][2] = colors::GREEN;
-        rot = 1;
-        break;
-    case 2:
-        clear();
-        piece[0][0] = colors::GREEN;
-        piece[1][0] = colors::GREEN;
-        piece[1][1] = colors::GREEN;
-        piece[2][1] = colors::GREEN;
-        rot = 2;
-        break;
-    default:
-        break;
-    }
+    this->shape = {{
+        {0, 2, 0, 0},
+        {0, 2, 0, 0},
+        {0, 2, 2, 0},
+        {0, 0, 0, 0}
+    }};
 }
 
-S::S()
+LBlock::~LBlock() {};
+
+OBlock::OBlock()
 {
-    rotate(1);
-    rotnum = 2;
+    this->shape = {{
+        {0, 0, 0, 0},
+        {0, 3, 3, 0},
+        {0, 3, 3, 0},
+        {0, 0, 0, 0}
+    }};
 }
 
-S::~S() {};
+OBlock::~OBlock() {};
 
-void T::rotate(int rotation)
+SBlock::SBlock()
 {
-    switch (rotation)
-    {
-    case 1:
-        clear();
-        piece[0][1] = colors::VIOLET;
-
-        for (int i = 0; i < SIZEXY - 1; i++)
-        {
-            piece[1][i] = colors::VIOLET;
-        }
-        rot = 1;
-        break;
-    case 2:
-        clear();
-        piece[1][1] = colors::VIOLET;
-
-        for (int i = 0; i < SIZEXY - 1; i++)
-        {
-            piece[i][0] = colors::VIOLET;
-        }
-        rot = 2;
-        break;
-    case 3:
-        clear();
-        piece[1][1] = colors::VIOLET;
-
-        for (int i = 0; i < SIZEXY - 1; i++)
-        {
-            piece[0][i] = colors::VIOLET;
-        }
-        rot = 3;
-        break;
-    case 4:
-        clear();
-        piece[1][0] = colors::VIOLET;
-
-        for (int i = 0; i < SIZEXY - 1; i++)
-        {
-            piece[i][1] = colors::VIOLET;
-        }
-        rot = 4;
-        break;
-
-    default:
-        break;
-    }
+    this->shape = {{
+        {0, 0, 0, 0},
+        {0, 0, 4, 4},
+        {0, 4, 4, 0},
+        {0, 0, 0, 0}
+    }};
 }
 
-T::T()
+SBlock::~SBlock() {};
+
+ZBlock::ZBlock()
 {
-    rotate(1);
-    rotnum = 4;
+    this->shape = {{
+        {0, 0, 0, 0},
+        {0, 1, 1, 0},
+        {0, 0, 1, 1},
+        {0, 0, 0, 0}
+    }};
 }
 
-T::~T() {};
+ZBlock::~ZBlock() {};
 
-void Z::rotate(int rotation)
+TBlock::TBlock()
 {
-    switch (rotation)
-    {
-    case 1:
-        clear();
-        piece[0][0] = colors::RED;
-        piece[0][1] = colors::RED;
-        piece[1][1] = colors::RED;
-        piece[1][2] = colors::RED;
-        rot = 1;
-        break;
-    case 2:
-        clear();
-        piece[0][1] = colors::RED;
-        piece[1][1] = colors::RED;
-        piece[1][0] = colors::RED;
-        piece[2][0] = colors::RED;
-        rot = 2;
-        break;
-    default:
-        break;
-    }
+    this->shape = {{
+        {0, 0, 7, 0},
+        {0, 7, 7, 0},
+        {0, 0, 7, 0},
+        {0, 0, 0, 0}
+    }};
 }
 
-Z::Z()
-{
-    rotate(1);
-    rotnum = 2;
-}
-
-Z::~Z() {};
+TBlock::~TBlock() {};
