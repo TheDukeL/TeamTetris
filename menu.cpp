@@ -6,7 +6,7 @@ tetris_window::tetris_window()
   set_border_width(10);
 
   image.set("tetrismenubackground1.png");
-  grid.attach(image,0,0,3,1);
+  grid.attach(image,0,2,3,1);
 
   
   
@@ -63,4 +63,4 @@ void tetris_window::settingspop(){
     //music on by default
       break;
   }
-} 
+}
