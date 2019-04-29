@@ -1,25 +1,29 @@
+#include <gtkmm.h>
 #include "Game.h"
 #include "App.h"
 
-App::App() {};
+App::App(SFMLWidget& widget) : widget(widget)
+{
+	widget.renderWindow.create(VideoMode(WINDOWSIZEXY[X],WINDOWSIZEXY[Y]), GAMENAME, Style::Titlebar | Style::Close);
+}
+
 App::~App() {};
 
-bool App::startGame()
+void App::startGame()
 {
-	window.create(VideoMode(WINDOWSIZEXY[X],WINDOWSIZEXY[Y]), GAMENAME, Style::Titlebar | Style::Close);
-	Game oneGame(window);
+	Game oneGame(widget.renderWindow);
 	oneGame.start();
 
-	while (window.isOpen())
+	while (widget.renderWindow.isOpen())
 	{
 		Event event;
 		
 		//sends events to game
-		while (window.pollEvent(event))
+		while (widget.renderWindow.pollEvent(event))
+		{
 			oneGame.update(event);
-		
+		}
 		//controlls time for moving down a piece
 		oneGame.tick();
 	}
-	return false;
 }
