@@ -12,6 +12,9 @@ public:
 
 
 protected:
+////
+void helping();
+void settingspop();
 
   Gtk::Image image;
   Gtk::Button start;
