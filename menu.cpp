@@ -10,12 +10,10 @@ tetris_window::tetris_window()
 
   
   
-  
   start.add_label("Start");
   //
   grid.attach(start,0,1,1,1);
 
-  
 
 
   settings.add_label("Settings");
