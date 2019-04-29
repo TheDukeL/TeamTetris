@@ -21,7 +21,10 @@ tetris_window::tetris_window()
   settings.add_label("Settings");
   //
   grid.attach(settings,1,1,1,1);
-
+  ////
+  settings.signal_pressed().connect(sigc::mem_fun(*this,&tetris_window::settingspop));
+  ////
+  
   
   help.add_label("Help");
   //
@@ -41,5 +44,8 @@ tetris_window::~tetris_window()
 {}
 ////
 void tetris_window::helping(){
+  
+}
+void tetris_window::settingspop(){
   
 }
