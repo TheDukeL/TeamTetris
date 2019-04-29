@@ -1,7 +1,7 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include<gtkmm.h>
+#include <gtkmm.h>
 
 class tetris_window:public Gtk::Window
 {
