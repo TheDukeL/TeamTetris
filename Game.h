@@ -17,13 +17,12 @@ class Game
 {
 	
 public:
-
-	void tick();
-	void update(const Event event);
-	void start();
 	 Game(RenderWindow &window);
 	~Game();
 	
+	void start();
+	void tick();
+	void update(const Event event);
 	
 private:
 	Board oneBoard;

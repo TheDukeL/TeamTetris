@@ -68,7 +68,7 @@ int Board::checkAndCleanLines()
 
 	for (int line : linesToClean)
 		cleanLine(line);
-
+		
 	return linesToClean.size();
 }
 
