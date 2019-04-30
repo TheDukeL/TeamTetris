@@ -1,7 +1,6 @@
 #include "SFMLWidget.h"
 #include <iostream>
 
-// Tested on Linux Mint 12.4 and Windows 7
 #if defined(SFML_SYSTEM_WINDOWS)
 
 #include <gdk/gdkwin32.h>
@@ -27,7 +26,7 @@ SFMLWidget::SFMLWidget(sf::VideoMode mode, int size_request)
 {
     if(size_request<=0)
         size_request = std::max<int>(1, std::min<int>(mode.width, mode.height) / 2);
-        
+
     set_size_request(size_request, size_request);
 
     set_has_window(false); // Makes this behave like an interal object rather then a parent window.
@@ -80,7 +79,7 @@ void SFMLWidget::on_realize()
 
 
         m_refGdkWindow = Gdk::Window::create(get_window(), &attributes,
-                GDK_WA_X | GDK_WA_Y);
+                                             GDK_WA_X | GDK_WA_Y);
         set_has_window(true);
         set_window(m_refGdkWindow);
 
@@ -102,10 +101,10 @@ void SFMLWidget::on_realize()
 
 void SFMLWidget::on_unrealize()
 {
-  m_refGdkWindow.clear();
+    m_refGdkWindow.clear();
 
-  //Call base class:
-  Gtk::Widget::on_unrealize();
+    //Call base class:
+    Gtk::Widget::on_unrealize();
 }
 
 void SFMLWidget::display()
