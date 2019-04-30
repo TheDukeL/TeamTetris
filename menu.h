@@ -15,6 +15,7 @@ protected:
 ////
 void helping();
 void settingspop();
+void startGame();
 
   Gtk::Image image;
   Gtk::Button start;

@@ -4,6 +4,7 @@
 tetris_window::tetris_window()
 {
   set_border_width(10);
+  resize(800,800);
 
   image.set("tetrismenubackground1.png");
   grid.attach(image,0,2,3,1);
@@ -13,7 +14,7 @@ tetris_window::tetris_window()
   start.add_label("Start");
   //
   grid.attach(start,0,1,1,1);
-
+  start.signal_pressed().connect(sigc::mem_fun(*this,&tetris_window::startGame));
 
 
   settings.add_label("Settings");
@@ -64,4 +65,9 @@ void tetris_window::settingspop(){
     //music on by default
       break;
   }
+}
+
+void tetris_window::startGame()
+{
+	this->hide();
 }

@@ -5,6 +5,7 @@
 App::App(SFMLWidget& widget) : widget(widget)
 {
 	widget.renderWindow.create(VideoMode(WINDOWSIZEXY[X],WINDOWSIZEXY[Y]), GAMENAME, Style::Titlebar | Style::Close);
+	widget.signal_draw().connect(sigc::bind_return(sigc::hide(sigc::mem_fun(this, &App::startGame)),true));
 }
 
 App::~App() {};
