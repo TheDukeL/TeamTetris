@@ -14,12 +14,10 @@ public:
 protected:
 ////
 void helping();
-void settingspop();
 void startGame();
 
   Gtk::Image image;
   Gtk::Button start;
-  Gtk::Button settings;
   Gtk::Button help;
   Gtk::Grid grid;
 };
