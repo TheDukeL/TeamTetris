@@ -211,6 +211,8 @@ OBlock::OBlock()
         {0, 3, 3, 0},
         {0, 0, 0, 0}
     }};
+
+    this->setY(STARTINGY - 1); //align starting location to getBoundsTop
 }
 
 OBlock::~OBlock() {};
@@ -223,6 +225,8 @@ SBlock::SBlock()
         {0, 4, 4, 0},
         {0, 0, 0, 0}
     }};
+
+    this->setY(STARTINGY - 1); //align starting location to getBoundsTop
 }
 
 SBlock::~SBlock() {};
@@ -235,6 +239,8 @@ ZBlock::ZBlock()
         {0, 0, 1, 1},
         {0, 0, 0, 0}
     }};
+
+    this->setY(STARTINGY - 1); //align starting location to getBoundsTop
 }
 
 ZBlock::~ZBlock() {};

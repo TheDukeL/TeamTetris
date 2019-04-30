@@ -1,7 +1,6 @@
 #include <gtkmm.h>
 #include "SFMLWidget.h"
 #include "App.h"
-#include "menu.h"
 
 int main(int argc, char** argv)
 {

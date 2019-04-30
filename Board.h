@@ -12,7 +12,6 @@ public:
 
 	void settleTetromino(Tetromino& tetromino);
 	int checkAndCleanLines();
-	bool checkCollision(Tetromino & tetromino, int x, int y);
 	bool movementAllowed(Tetromino& tetromino, int xOff, int yOff);
 	bool checkGameOver();
 	void cleanBoard();

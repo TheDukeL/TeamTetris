@@ -16,53 +16,6 @@ void Board::settleTetromino(Tetromino& tetromino)
 				settledPieces[i+tetromino.getY()][j+tetromino.getX()] = tetromino.getShape()[i][j];
 }
 
-//checks if the tetromino is colliding with settled tetrominos on the board at x, y
-bool Board::checkCollision(Tetromino & tetromino, int x, int y)
-{
-	int tetX = tetromino.getX();
-	int tetY = tetromino.getY();
-	int size = tetromino.getSIZEXY();
-
-	for (int i = 0; i < tetromino.getSIZEXY(); i++)
-	{
-		for (int j = 0; j < tetromino.getSIZEXY(); j++)
-		{
-			if (tetY+j > SIZEXY[Y]-1)
-				return true;
-
-			if (tetromino.getShape()[i][j] != EMPTY)
-			{
-				if (settledPieces[tetX + i + 1][tetY + j + 1] != EMPTY)
-					return true;
-			}
-		}
-	}
-
-	/*
-	for (int i = 0; i < tetromino.getSIZEXY(); i++)
-	{
-		for (int j = 0; j < tetromino.getSIZEXY(); j++)
-		{
-			if ((tetromino.getY()+i) > (SIZEXY[Y]-2) && tetromino.getShape()[i][j] != EMPTY)
-				return true;
-
-			if (i == tetromino.getSIZEXY()-1)
-			{
-				if (tetromino.getShape()[i][j] != EMPTY && settledPieces[i + tetromino.getY() + 1][j + tetromino.getX()] != EMPTY)
-					return true;
-			}
-			else
-			{ 
-				if (tetromino.getShape()[i][j] != EMPTY && tetromino.getShape()[i+1][j] == EMPTY && settledPieces[i + tetromino.getY() + 1][j + tetromino.getX()] != EMPTY)
-					return true;
-			}
-		}
-	}
-	*/
-
-	return false;
-}
-
 //check if the movement is allowed to xOff, yOff
 bool Board::movementAllowed(Tetromino & tetromino, int xOff, int yOff)
 {
@@ -79,45 +32,17 @@ bool Board::movementAllowed(Tetromino & tetromino, int xOff, int yOff)
 	if (xMin < 0 || xMax > SIZEXY[X] || yMax > SIZEXY[Y])
 		return false;
 
-	//make sure the new space isn't occupied by any settled tetrominoes
-	if (checkCollision(tetromino, x+xOff, y+yOff))
-	{
-		return false;
-	}
-
-	//check and see if any of the tetromino's squares overlap with any squares on the board
+	//check and see if any of the tetromino's squares overlap with any squares on the board or go out-of-bounds
 	for (int i = 0; i < size; i++)
 	{
 		for (int j = 0; j < size; j++)
 		{
 			if (tetromino.getShape()[i][j] != EMPTY && settledPieces[i+y+yOff][j+x+xOff] != EMPTY)
-			{
-				return false;
-			}
-		}
-	}
-
-	return true;
-
-/*
-	if (x < 0 || x > (SIZEXY[X]-1) || y > (SIZEXY[Y]-1))
-		return false;
-
-	for (int i = 0; i < tetromino.getSIZEXY(); i++)
-	{
-		for (int j = 0; j < tetromino.getSIZEXY(); j++)
-		{
-			if ((j+x) > (SIZEXY[X] - 1) && tetromino.getShape()[i][j] != EMPTY)	
-				return false;
-			if ((i+y) > (SIZEXY[Y] - 1) && tetromino.getShape()[i][j] != EMPTY)
-				return false;
-			if (tetromino.getShape()[i][j] != EMPTY && settledPieces[i + y][j + x] != EMPTY)
 				return false;
 		}
 	}
 
 	return true;
-	*/
 }
 
 //checks lines, cleans them and returns the amount of lines cleaned (for incrementing score)

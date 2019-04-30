@@ -160,6 +160,15 @@ void Game::rotate()
 	fallingTetromino->rotate();
 
 	// this is super ultra hacky
+	if (!oneBoard.movementAllowed(*fallingTetromino, 0, 0))
+	{
+		//rotated tetromino experienced a collision - rotate it 3 more times to move it back to the original position
+		fallingTetromino->rotate();
+		fallingTetromino->rotate();
+		fallingTetromino->rotate();
+	}
+
+/*
 	if (oneBoard.checkCollision(*fallingTetromino, fallingTetromino->getX(), fallingTetromino->getY()))//if (!oneBoard.movementAllowed(*fallingTetromino, 0, 0))
 	{
 		//rotated tetromino experienced a collision - rotate it 3 more times to move it back to the original position
@@ -167,6 +176,7 @@ void Game::rotate()
 		fallingTetromino->rotate();
 		fallingTetromino->rotate();
 	}
+	*/
 }
 
 //checks for lines to clean, cleans them, checks lines to next level and accumulates points
